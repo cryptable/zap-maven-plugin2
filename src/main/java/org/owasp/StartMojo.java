@@ -33,7 +33,7 @@ import org.zaproxy.clientapi.core.ClientApi;
 @Mojo( name = "start-zap",
        defaultPhase = LifecyclePhase.PRE_INTEGRATION_TEST,
        threadSafe = true )
-public class StartZAP extends AbstractMojo
+public class StartMojo extends AbstractMojo
 {
     /**
      * Location of the ZAProxy program.

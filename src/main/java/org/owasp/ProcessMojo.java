@@ -41,7 +41,7 @@ import org.zaproxy.clientapi.core.ClientApiException;
 @Mojo( name = "process-zap", 
        defaultPhase = LifecyclePhase.POST_INTEGRATION_TEST, 
        threadSafe = true )
-public class ProcessZAP extends AbstractMojo {
+public class ProcessMojo extends AbstractMojo {
 
     private ClientApi zapClientAPI;
     private Proxy proxy;
@@ -184,7 +184,7 @@ public class ProcessZAP extends AbstractMojo {
     private void scanURL(String url) throws ClientApiException {
         zapClientAPI.ascan.scan("apikey", url, "true", "false", "scanpolicyname");
 
-        while ( statusToInt(zapClientAPI.ascan.status("")) < 100) {
+        while ( statusToInt(zapClientAPI.ascan.status("scanid")) < 100) {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
