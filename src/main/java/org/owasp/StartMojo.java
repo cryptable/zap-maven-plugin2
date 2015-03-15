@@ -26,6 +26,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.zaproxy.clientapi.core.ClientApi;
 
+import static org.owasp.ProcessMojo.APIKEY;
 
 /**
  * Goal which will start ZAP proxy.
@@ -62,7 +63,7 @@ public class StartMojo extends AbstractMojo
     /**
      * Sleep to wait to start ZAProxy
      */
-	@Parameter( defaultValue="4000" )
+	@Parameter( defaultValue="20000" )
     private int zapSleep;
     
     public void execute()
@@ -73,7 +74,7 @@ public class StartMojo extends AbstractMojo
                 ClientApi zapClient = new ClientApi(zapProxyHost, zapProxyPort);
                 File tempFile = File.createTempFile("ZAP", null);
                 getLog().info("Create Session with temporary file [" + tempFile.getPath() + "]");
-                zapClient.core.newSession("apikey",tempFile.getPath(), "true");
+                zapClient.core.newSession(APIKEY,tempFile.getPath(), "true");
             } else {
                 File pf = new File(zapProgram);
                 Runtime runtime = java.lang.Runtime.getRuntime();
@@ -122,7 +123,8 @@ public class StartMojo extends AbstractMojo
                 }.start();       
                 
             }
-            Thread.currentThread().sleep(zapSleep);
+            Thread.currentThread();
+			Thread.sleep(zapSleep);
         } catch(Exception e) {
                 e.printStackTrace();
                 throw new MojoExecutionException("Unable to start ZAP [" + zapProgram + "]");

@@ -45,6 +45,7 @@ public class ProcessMojo extends AbstractMojo {
 
     private ClientApi zapClientAPI;
     private Proxy proxy;
+    final static String APIKEY = "jf19sjgar2pn4qs8osfqje3on3";
 
     /**
      * Location of the host of the ZAP proxy
@@ -164,7 +165,7 @@ public class ProcessMojo extends AbstractMojo {
      * @throws ClientApiException
      */
     private void spiderURL(String url) throws ClientApiException {
-        zapClientAPI.spider.scan("apikey", url, "children");
+        zapClientAPI.spider.scan(APIKEY, url, "10");
 
         while ( statusToInt(zapClientAPI.spider.status("scanid")) < 100) {
             try {
@@ -182,7 +183,7 @@ public class ProcessMojo extends AbstractMojo {
      * @throws ClientApiException
      */
     private void scanURL(String url) throws ClientApiException {
-        zapClientAPI.ascan.scan("apikey", url, "true", "false", "scanpolicyname");
+        zapClientAPI.ascan.scan(APIKEY, url, "true", "false", "scanpolicyname");
 
         while ( statusToInt(zapClientAPI.ascan.status("scanid")) < 100) {
             try {
@@ -314,7 +315,7 @@ public class ProcessMojo extends AbstractMojo {
             if (shutdownZAP && (zapClientAPI != null)) {
                 try {
                     getLog().info("Shutdown ZAProxy");
-                    zapClientAPI.core.shutdown("apikey");
+                    zapClientAPI.core.shutdown(APIKEY);
                 } catch (Exception e) {
                     getLog().error(e.toString());
                     e.printStackTrace();
