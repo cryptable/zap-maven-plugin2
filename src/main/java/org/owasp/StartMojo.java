@@ -66,7 +66,10 @@ public class StartMojo extends AbstractMojo
 	@Parameter( defaultValue="20000" )
     private int zapSleep;
     
-    public void execute()
+	@Parameter( defaultValue="false" )
+    private boolean daemon;
+
+	public void execute()
         throws MojoExecutionException
     {
     	try {
@@ -80,7 +83,11 @@ public class StartMojo extends AbstractMojo
                 Runtime runtime = java.lang.Runtime.getRuntime();
                 getLog().info("Start ZAProxy [" + zapProgram + "]");
                 getLog().info("Using working directory [" + pf.getParentFile().getPath() + "]");
-                final Process ps = runtime.exec(zapProgram, null, pf.getParentFile());
+                String[] command = { zapProgram, "" };
+                if (daemon) {
+                	command[1] = "-daemon";
+                }
+                final Process ps = runtime.exec(command, null, pf.getParentFile());
                 
                 // Consommation de la sortie standard de l'application externe dans un Thread separe
                 new Thread() {
