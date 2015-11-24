@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.owasp</groupId>
     <artifactId>zap-maven-plugin2</artifactId>
-    <version>1.2</version>
+    <version>1.2-SNAPSHOT</version>
     <packaging>maven-plugin</packaging>
     <name>zap-maven-plugin2 Maven Plugin</name>
     <url>https://github.com/javabeanz/zap-maven-plugin2</url>
@@ -61,8 +62,7 @@
         <connection>scm:git:git@github.com:ddt-tdd/zap-maven-plugin2.git</connection>
         <url>scm:git:git@github.com:ddt-tdd/zap-maven-plugin2.git</url>
         <developerConnection>scm:git:git@github.com:ddt-tdd/zap-maven-plugin2.git</developerConnection>
-      <tag>zap-maven-plugin2-1.2</tag>
-  </scm>
+    </scm>
     <build>
         <plugins>
             <plugin>
@@ -128,7 +128,7 @@
                             <!-- Linux -->
                             <!-- zapProgram>D:/projects/zaproxy-read-only/build/zap/zap.bat</zapProgram-->
                             <zapProgram>D:/tools/OWASP/Zed Attack Proxy/zap.bat</zapProgram>
-                            <apiKEY>SHOULD BE CREATED IN ZAP AND COPIED OVER HERE</apiKEY>
+
                             <zapProxyHost>localhost</zapProxyHost>
                             <zapProxyPort>8080</zapProxyPort>
                             <targetURL>http://localhost:8070/</targetURL>
