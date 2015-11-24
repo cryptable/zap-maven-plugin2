@@ -139,10 +139,4 @@
             </build>
         </profile>
     </profiles>
-
-    <scm>
-        <connection>scm:git:git@github.com:ddt-tdd/zap-maven-plugin2.git</connection>
-        <url>scm:git:git@github.com:ddt-tdd/zap-maven-plugin2.git</url>
-        <developerConnection>scm:git:git@github.com:ddt-tdd/zap-maven-plugin2.git</developerConnection>
-    </scm>
 </project>
