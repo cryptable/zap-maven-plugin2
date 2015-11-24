@@ -121,6 +121,8 @@
                             </execution>
                         </executions>
                         <configuration>
+                            <!-- Example -->
+                            <!-- see: https://github.com/ddt-tdd/bodgeit-maven with the same releases -->
                             <!-- Windows -->
                             <!-- <zapProgram>C:\Program Files\OWASP\Zed Attack Proxy\zap.bat</zapProgram> -->
                             <!-- Mac OS X -->
@@ -128,7 +130,7 @@
                             <!-- Linux -->
                             <!-- zapProgram>D:/projects/zaproxy-read-only/build/zap/zap.bat</zapProgram-->
                             <zapProgram>D:/tools/OWASP/Zed Attack Proxy/zap.bat</zapProgram>
-
+                            <apiKEY>SHOULD BE CREATED IN ZAPROXY AND COPIED INHERE</apiKEY>
                             <zapProxyHost>localhost</zapProxyHost>
                             <zapProxyPort>8080</zapProxyPort>
                             <targetURL>http://localhost:8070/</targetURL>
