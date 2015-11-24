@@ -14,13 +14,19 @@ package org.owasp;
  */
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Properties;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
@@ -35,9 +41,11 @@ import org.zaproxy.clientapi.core.ApiResponseElement;
 import org.zaproxy.clientapi.core.ClientApi;
 import org.zaproxy.clientapi.core.ClientApiException;
 
+
 /**
  * Goal which touches a timestamp file.
  */
+@SuppressWarnings("restriction")
 @Mojo( name = "process-zap", 
        defaultPhase = LifecyclePhase.POST_INTEGRATION_TEST, 
        threadSafe = true )
@@ -45,7 +53,6 @@ public class ProcessMojo extends AbstractMojo {
 
     private ClientApi zapClientAPI;
     private Proxy proxy;
-    final static String APIKEY = "jf19sjgar2pn4qs8osfqje3on3";
 
     /**
      * Location of the host of the ZAP proxy
@@ -54,6 +61,12 @@ public class ProcessMojo extends AbstractMojo {
     		    required = true)
     private String zapProxyHost;
 
+    /**
+     * Location of the host of the ZAP proxy
+     */
+    @Parameter( required = true)
+    private String apiKEY;
+    
     /**
      * Location of the port of the ZAP proxy
      */
@@ -94,8 +107,7 @@ public class ProcessMojo extends AbstractMojo {
     /**
      * Save session of scan
      */
-    @Parameter( defaultValue="tru"
-    		+ "e" )
+    @Parameter( defaultValue="true" )
     private boolean reportAlerts;
 
     /**
@@ -105,11 +117,23 @@ public class ProcessMojo extends AbstractMojo {
     private String reportsDirectory;
 
     /**
+     * Reports filename without an extension, extension determined during format
+     */
+    @Parameter( required=false)
+    private String reportsFilenameNoExtension;
+    
+    /**
      * Set the output format type, in addition to the XML report. Must be one of "none" or "json".
      */
     @Parameter ( defaultValue="none" )
     private String format;
 
+    /**
+     * Location of the host of the ZAP proxy
+     */
+    @Parameter( required = false )
+    private String finalizeScript;
+    
     /**
      * create a Timestamp
      * 
@@ -165,7 +189,7 @@ public class ProcessMojo extends AbstractMojo {
      * @throws ClientApiException
      */
     private void spiderURL(String url) throws ClientApiException {
-        zapClientAPI.spider.scan(APIKEY, url, "10");
+        zapClientAPI.spider.scan(apiKEY, url, "10", "");
 
         while ( statusToInt(zapClientAPI.spider.status("scanid")) < 100) {
             try {
@@ -183,7 +207,7 @@ public class ProcessMojo extends AbstractMojo {
      * @throws ClientApiException
      */
     private void scanURL(String url) throws ClientApiException {
-        zapClientAPI.ascan.scan(APIKEY, url, "true", "false", "scanpolicyname");
+        zapClientAPI.ascan.scan(apiKEY, url, "true", "false", "", "", "");
 
         while ( statusToInt(zapClientAPI.ascan.status("scanid")) < 100) {
             try {
@@ -197,7 +221,7 @@ public class ProcessMojo extends AbstractMojo {
     /**
      * Get all alerts from ZAP proxy
      *
-     * @param json true for json form, false for xml format
+     * @param format specification. It can be : 'xml', 'json', 'html'
      * @return  all alerts from ZAProxy
      * @throws Exception
      */
@@ -234,7 +258,7 @@ public class ProcessMojo extends AbstractMojo {
     /**
      * Get all alerts from ZAP proxy
      *
-     * @param json true for json form, false for xml format
+     * @param format specification. It can be : 'xml', 'json', 'html'
      * @return  all alerts from ZAProxy
      * @throws Exception
      */
@@ -248,6 +272,54 @@ public class ProcessMojo extends AbstractMojo {
             return "xml";
         }
     	
+    }
+
+    /**
+     * Property file to update for proxy settings
+     */
+    @Parameter(alias = "property.file", required = false)
+    private String propertyFile;
+    
+    /**
+     * Proxy port setting in the property file
+     */
+    @Parameter(alias = "property.file.proxy.host", required = false)
+    private String propertyFileProxyHost;
+    
+    /**
+     * Proxy host setting in the property file
+     */
+    @Parameter(alias = "property.file.proxy.port", required = false)
+    private String propertyFileProxyPort;
+    
+    /**
+     * 
+     * This method overwrites the super class implementation.
+     * @throws IOException 
+     */
+    private void restoreProperties() throws IOException {
+        Properties properties = new Properties();
+        FileInputStream fi = new FileInputStream(propertyFile);
+        properties.load(fi);
+        fi.close();
+        if ((properties.getProperty("zapperdepap" + propertyFileProxyHost) == null) || properties.getProperty("zapperdepap" + propertyFileProxyHost).isEmpty()) {
+            getLog().info("Delete Propery [" + propertyFileProxyHost + "]");
+            properties.remove(propertyFileProxyHost);
+            getLog().info("Delete Propery [" + propertyFileProxyPort + "]");            
+            properties.remove(propertyFileProxyPort);            
+        }
+        else {
+            getLog().info("Restore Propery [" + propertyFileProxyHost + "] with value [" + properties.getProperty(propertyFileProxyHost) + "] to [" + properties.getProperty("zapperdepap" + propertyFileProxyHost) + "]");
+            properties.setProperty(propertyFileProxyHost, properties.getProperty("zapperdepap" + propertyFileProxyHost));
+            properties.remove("zapperdepap" + propertyFileProxyHost);
+            getLog().info("Restore Propery [" + propertyFileProxyPort + "] with value [" + properties.getProperty(propertyFileProxyPort) + "] to [" + properties.getProperty("zapperdepap" + propertyFileProxyPort) + "]");
+            properties.setProperty(propertyFileProxyPort, properties.getProperty("zapperdepap" + propertyFileProxyPort));
+            properties.remove("zapperdepap" + propertyFileProxyPort);
+        }
+        
+        FileOutputStream fo = new FileOutputStream(propertyFile);
+        properties.store(fo, null);
+        fo.close();
     }
 
     /**
@@ -291,8 +363,14 @@ public class ProcessMojo extends AbstractMojo {
             if (reportAlerts) {
 
                 // reuse fileName of the session file
-                if ((fileName == null) || (fileName.length() == 0))
-                    fileName = createTempFilename("ZAP", "");
+                if ((reportsFilenameNoExtension == null) || reportsFilenameNoExtension.isEmpty()) {
+                    if ((fileName == null) || (fileName.length() == 0)) {
+                        fileName = createTempFilename("ZAP", "");
+                    }                    
+                }
+                else {
+                    fileName = reportsFilenameNoExtension;
+                }
 
                 String fileName_no_extension = FilenameUtils.concat(reportsDirectory, fileName);
 
@@ -300,12 +378,18 @@ public class ProcessMojo extends AbstractMojo {
                     String alerts = getAllAlerts(getAllAlertsFormat(format));
                     String fullFileName = fileName_no_extension + "." + getAllAlertsFormat(format);
                     FileUtils.writeStringToFile(new File(fullFileName), alerts);
-                    
                     getLog().info("File save in format in ["+getAllAlertsFormat(format)+"]");
+                    if (format.equals("json")) {
+                        Utils.copyResourcesRecursively(getClass().getResource("/zap-reports/"), new File(reportsDirectory));
+                    }
                 } catch (Exception e) {
                     getLog().error(e.toString());
                     e.printStackTrace();
                 }
+            }
+            
+            if (!propertyFile.isEmpty()) {
+                restoreProperties();
             }
 
         } catch (Exception e) {
@@ -315,7 +399,7 @@ public class ProcessMojo extends AbstractMojo {
             if (shutdownZAP && (zapClientAPI != null)) {
                 try {
                     getLog().info("Shutdown ZAProxy");
-                    zapClientAPI.core.shutdown(APIKEY);
+                    zapClientAPI.core.shutdown(apiKEY);
                 } catch (Exception e) {
                     getLog().error(e.toString());
                     e.printStackTrace();
