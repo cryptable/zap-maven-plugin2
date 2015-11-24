@@ -387,8 +387,8 @@ public class ProcessMojo extends AbstractMojo {
                     e.printStackTrace();
                 }
             }
-            
-            if (!propertyFile.isEmpty()) {
+
+            if ((propertyFile != null) && !propertyFile.isEmpty()) {
                 restoreProperties();
             }
 
